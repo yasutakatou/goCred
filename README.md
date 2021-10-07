@@ -39,3 +39,4 @@ _____________         __________         ___________
 # options
 
 # license
+3-clause BSD License
