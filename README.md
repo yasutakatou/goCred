@@ -12,4 +12,30 @@ This tool will provide strong privileges to development users without the need t
 This is a solution that automatically renews the strong permissions of aws cloudshell at each deadline through a relay server.
 
 # Architecture
-This is a solution that automatically renews the strong permissions of aws cloudshell at each deadline through a relay server.
+
+1. AWS Cloudshell
+
+```
+curl -H"Authorization: $AWS_CONTAINER_AUTHORIZATION_TOKEN" $AWS_CONTAINER_CREDENTIALS_FULL_URI
+```
+
+2. Server mode
+
+3. Proxy mode
+
+4. Client mode
+
+```
+SSL & AES encrypted Credential by Token
+_____________         __________         ___________
+|Server mode | ----> |Proxy mode| <---- |Client mode|
+-------------         ----------         -----------
+|Cloudshell  |       Tokenized Data     SSL & Dencrypt by Token
+-------------
+```
+
+# installation
+
+# options
+
+# license
