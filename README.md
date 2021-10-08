@@ -1,5 +1,5 @@
 # goCred (document writing..)
-**Aws credential solution by Golang**
+**Aws credential solution by Golang (Works on Linux, Arm, and Windows)**
 
 # Solution
 Is your team managing AWS credentials properly?
@@ -10,20 +10,18 @@ This tool will provide strong privileges to development users without the need t
 
 # Feature
 This is a solution that automatically renews the strong permissions of aws cloudshell at each deadline through a relay server.
-
-# Architecture
-
-1. AWS Cloudshell
+In cloudshell, credentials similar to account privileges can be obtained in the following way.
 
 ```
 curl -H"Authorization: $AWS_CONTAINER_AUTHORIZATION_TOKEN" $AWS_CONTAINER_CREDENTIALS_FULL_URI
 ```
 
-2. Server mode
+This tool prepares a proxy and delivers the same credentials to the client.
+The benefits of this are as follows
+- No need to create authoritative credentials.
+- No more accidents due to failure to update credentials that have been created.
 
-3. Proxy mode
-
-4. Client mode
+# Architecture
 
 ```
 SSL & AES encrypted Credential by Token
@@ -34,8 +32,23 @@ _____________         __________         ___________
 -------------
 ```
 
+1. Server mode
+
+Get the credentials from AWS cloudshell, encrypt them with a token, and then forward them to the Proxy server.
+
+2. Proxy mode
+
+Save the credentials for each token.
+
+note) Since the proxy server needs to be accessed by both the server and the client, the credentials are stored in encrypted form.
+The estimate is that if a string is leaked, it will take an update of the credential before it can be compounded.
+
+3. Client mode
+
+Get the encrypted credentials that came to access with the token as a password, and compound them with the token.
+
 ![2](https://user-images.githubusercontent.com/22161385/136405752-f4134a0b-5522-41b0-ac7e-4e872785d53a.png)
-When *Expiration* expires, the server sends the update information to the Proxy and the client gets the update.
+When *Expiration* expires, the server sends the update information to the server and the client gets the update.
 
 # installation
 
