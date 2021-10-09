@@ -284,15 +284,17 @@ func clientStart(ip, token string) {
 		count = count + 1
 		if count > (countDown * 3) {
 			fmt.Println("IP: " + ip + " Token: " + token + " Expiration: " + expiration)
-			setHwnd := winctl.GetWindow("GetForegroundWindow", debug)
-			if targetHwnd := winctl.FocusWindow(Cloudshell, debug); winctl.ChangeTarget(targetHwnd, tryCounter, waitSeconds, debug) == false {
-				fmt.Println("AWS CloudShell Window not found!")
-				os.Exit(1)
-			}
-			string2keyboard.KeyboardWrite("\\n")
-			time.Sleep(time.Duration(waitSeconds) * time.Millisecond)
-			winctl.SetActiveWindow(winctl.HWND(setHwnd), debug)
 			count = 0
+			if linux == false {
+				setHwnd := winctl.GetWindow("GetForegroundWindow", debug)
+				if targetHwnd := winctl.FocusWindow(Cloudshell, debug); winctl.ChangeTarget(targetHwnd, tryCounter, waitSeconds, debug) == false {
+					fmt.Println("AWS CloudShell Window not found!")
+					os.Exit(1)
+				}
+				string2keyboard.KeyboardWrite("\\n")
+				time.Sleep(time.Duration(waitSeconds) * time.Millisecond)
+				winctl.SetActiveWindow(winctl.HWND(setHwnd), debug)
+			}
 		}
 	}
 }
