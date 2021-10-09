@@ -32,5 +32,5 @@ func GetWindowRect(hwnd HWND, rect *RECTdata, Debug bool) (err error) {
 }
 
 func ChangeTarget(setHwnd uintptr, tryCounter, waitSeconds int, Debug bool) bool {
-	return
+	return false
 }
