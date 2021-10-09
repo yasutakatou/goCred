@@ -135,8 +135,18 @@ Usage of goCred.exe:
 ssl_certificate file path (if you don't use https, haven't to use this option)
 
 ## -client
+
+This is the client mode to get the token from the proxy.
+You need to specify the address of the proxy server where you want to get the token.
+
 ## -cloudshell string
+
+This is the title of the CloudShell window that will be operated periodically when rpa is enabled.
+
 ## -count int
+
+It's like a regular checkup of the condition.
+
 ## -debug
 
 debug mode (true is enable)
@@ -154,12 +164,22 @@ Specify the log file name.
 port number
 
 ## -proxy
+
+Start in proxy mode and wait for server mode and client mode to connect.
+
 ## -rpa
 
+CloudShell is a use that times out if no operation continues. With this option, you can enter a mode to avoid timeouts by periodically typing ENTER into CloudShell
+
+note) If you don't use this feature, the default timeout will be 20 minutes.
+note) For now, only Windows OS is supported. I need support for people who have MacOS.
+note) A window showing CloudShell in a browser is required.
 ![image](https://user-images.githubusercontent.com/22161385/136655431-19721e8c-a612-4308-8054-ff21bad88cc5.png)
 
-
 ## -server
+
+This is the mode to transfer credential from CloudShell to Proxy server.
+
 ## -token string
 
 authentication token (if this value is null, is set random)
