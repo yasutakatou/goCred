@@ -99,11 +99,15 @@ note) The XXX part should be the latest version.
 
 # options
 ```
-Usage of ./goCred:
+Usage of goCred.exe:
   -cert string
         [-cert=ssl_certificate file path] (default "localhost.pem")
   -client
         [-client=Client mode (true is enable)]
+  -cloudshell string
+        [-cloudshell=AWS Cloudshell window titile] (default "CloudShell")
+  -count int
+        [-count=operating interval ] (default 60)
   -debug
         [-debug=debug mode (true is enable)]
   -key string
@@ -114,21 +118,60 @@ Usage of ./goCred:
         [-prort=Port Number (Use Proxy mode)] (default "8080")
   -proxy
         [-proxy=Proxy mode (true is enable)]
+  -rpa
+        [-rpa=CloudShell timeout guard (true is enable)] (default true)
   -server
         [-server=Server mode (true is enable)]
   -token string
         [-token=authentication token (if this value is null, is set random)]
+  -try int
+        [-try=error and try counter] (default 100)
+  -wait int
+        [-wait=loop wait Millisecond] (default 250)
 ```
 
 ## -cert string
+
+ssl_certificate file path (if you don't use https, haven't to use this option)
+
 ## -client
+## -cloudshell string
+## -count int
 ## -debug
+
+debug mode (true is enable)
+
 ## -key string
+
+ssl_certificate_key file path (if you don't use https, haven't to use this option)
+
 ## -log
+
+Specify the log file name.
+
 ## -port string
+
+port number
+
 ## -proxy
+## -rpa
+
+![image](https://user-images.githubusercontent.com/22161385/136655431-19721e8c-a612-4308-8054-ff21bad88cc5.png)
+
+
 ## -server
 ## -token string
+
+authentication token (if this value is null, is set random)
+  
+## -try int
+
+error and try counter
+**In case of wait next screen a while, set value larger.**
+
+## -wait int
+
+loop wait Millisecond
 
 # license
 3-clause BSD License
