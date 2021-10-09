@@ -2,24 +2,24 @@
 **Aws credential solution by Golang (Works on Linux, Arm, and Windows)**
 
 # Solution
-Is your team managing AWS credentials properly?
-Are you paying out credentials with strong permissions in perpetuity for reasons such as the hassle of renewal?
-Also, you have no control over how long and with what privileges the credential will be used.
-Are you treating credentials the same way you treat old password operations?
-This tool will provide strong privileges to development users without the need to create credentials
+Is your team managing AWS credentials properly?<br>
+Are you paying out credentials with strong permissions in perpetuity for reasons such as the hassle of renewal?<br>
+Also, you have no control over how long and with what privileges the credential will be used.<br>
+Are you treating credentials the same way you treat old password operations?<br>
+This tool will provide strong privileges to development users without the need to create credentials<br>
 
 # Feature
-This is a solution that automatically renews the strong permissions of aws cloudshell at each deadline through a relay server.
-In cloudshell, credentials similar to account privileges can be obtained in the following way.
+This is a solution that automatically renews the strong permissions of aws cloudshell at each deadline through a relay server.<br>
+In cloudshell, credentials similar to account privileges can be obtained in the following way.<br>
 
 ```
 curl -H"Authorization: $AWS_CONTAINER_AUTHORIZATION_TOKEN" $AWS_CONTAINER_CREDENTIALS_FULL_URI
 ```
 
-This tool prepares a proxy and delivers the same credentials to the client.
-The benefits of this are as follows
-- No need to create authoritative credentials.
-- No more accidents due to failure to update credentials that have been created.
+This tool prepares a proxy and delivers the same credentials to the client.<br>
+The benefits of this are as follows<br>
+- No need to create authoritative credentials.<br>
+- No more accidents due to failure to update credentials that have been created.<br>
 
 # Architecture
 
@@ -40,8 +40,8 @@ Get the credentials from AWS cloudshell, encrypt them with a token, and then for
 
 Save the credentials for each token.
 
-note) Since the proxy server needs to be accessed by both the server and the client, the credentials are stored in encrypted form.
-The estimate is that if a string is leaked, it will take an update of the credential before it can be compounded.
+note) Since the proxy server needs to be accessed by both the server and the client, the credentials are stored in encrypted form.<br>
+The estimate is that if a string is leaked, it will take an update of the credential before it can be compounded.<br>
 
 3. Client mode
 
@@ -136,7 +136,7 @@ ssl_certificate file path (if you don't use https, haven't to use this option)
 
 ## -client
 
-This is the client mode to get the token from the proxy.
+This is the client mode to get the token from the proxy.<br>
 You need to specify the address of the proxy server where you want to get the token.
 
 ## -cloudshell string
@@ -169,11 +169,11 @@ Start in proxy mode and wait for server mode and client mode to connect.
 
 ## -rpa
 
-CloudShell is a use that times out if no operation continues. With this option, you can enter a mode to avoid timeouts by periodically typing ENTER into CloudShell
+CloudShell is a use that times out if no operation continues. With this option, you can enter a mode to avoid timeouts by periodically typing ENTER into CloudShell<br>
 
-note) If you don't use this feature, the default timeout will be 20 minutes.
-note) For now, only Windows OS is supported. I need support for people who have MacOS.
-note) A window showing CloudShell in a browser is required.
+note) If you don't use this feature, the default timeout will be 20 minutes.<br>
+note) For now, only Windows OS is supported. I need support for people who have MacOS.<br>
+note) A window showing CloudShell in a browser is required.<br>
 ![image](https://user-images.githubusercontent.com/22161385/136655431-19721e8c-a612-4308-8054-ff21bad88cc5.png)
 
 ## -server
