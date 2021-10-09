@@ -59,15 +59,15 @@ type responseData struct {
 }
 
 var (
-	debug, logging, linux bool
-	Token                 string
-	Cloudshell            string
-	encryptCred           []encryptCredData
-	rs1Letters            = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	targetHwnd            uintptr
-	tryCounter            int
-	waitSeconds           int
-	countDown             int
+	debug, logging, linux, rpa bool
+	Token                      string
+	Cloudshell                 string
+	encryptCred                []encryptCredData
+	rs1Letters                 = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	targetHwnd                 uintptr
+	tryCounter                 int
+	waitSeconds                int
+	countDown                  int
 )
 
 type (
@@ -93,12 +93,14 @@ func main() {
 	_try := flag.Int("try", 100, "[-try=error and try counter]")
 	_countDown := flag.Int("count", 60, "[-count=operating interval ]")
 	_wait := flag.Int("wait", 250, "[-wait=loop wait Millisecond]")
+	_rpa := flag.Bool("rpa", true, "[-rpa=CloudShell timeout guard (true is enable)]")
 
 	flag.Parse()
 
 	Cloudshell = string(*_Cloudshell)
 	debug = bool(*_debug)
 	logging = bool(*_Logging)
+	rpa = bool(*_rpa)
 	tryCounter = int(*_try)
 	countDown = int(*_countDown)
 	waitSeconds = int(*_wait)
@@ -285,7 +287,7 @@ func clientStart(ip, token string) {
 		if count > (countDown * 3) {
 			fmt.Println("IP: " + ip + " Token: " + token + " Expiration: " + expiration)
 			count = 0
-			if linux == false {
+			if linux == false && rpa == true {
 				setHwnd := winctl.GetWindow("GetForegroundWindow", debug)
 				if targetHwnd := winctl.FocusWindow(Cloudshell, debug); winctl.ChangeTarget(targetHwnd, tryCounter, waitSeconds, debug) == false {
 					fmt.Println("AWS CloudShell Window not found!")
