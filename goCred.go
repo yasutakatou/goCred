@@ -29,6 +29,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"yasutakatou/goCred/winctl"
 
 	"github.com/taglme/string2keyboard"
 )
@@ -57,15 +58,21 @@ type responseData struct {
 	Expiration string `json:"expiration"`
 }
 
-const (
-	countDown = 60
-)
-
 var (
 	debug, logging, linux bool
 	Token                 string
+	Cloudshell            string
 	encryptCred           []encryptCredData
 	rs1Letters            = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	targetHwnd            uintptr
+	tryCounter            int
+	waitSeconds           int
+	countDown             int
+)
+
+type (
+	HANDLE uintptr
+	HWND   HANDLE
 )
 
 func init() {
@@ -82,11 +89,19 @@ func main() {
 	_token := flag.String("token", "", "[-token=authentication token (if this value is null, is set random)]")
 	_client := flag.Bool("client", false, "[-client=Client mode (true is enable)]")
 	_Logging := flag.Bool("log", false, "[-log=logging mode (true is enable)]")
+	_Cloudshell := flag.String("cloudshell", "CloudShell", "[-cloudshell=AWS Cloudshell window titile]")
+	_try := flag.Int("try", 100, "[-try=error and try counter]")
+	_countDown := flag.Int("count", 60, "[-count=operating interval ]")
+	_wait := flag.Int("wait", 250, "[-wait=loop wait Millisecond]")
 
 	flag.Parse()
 
+	Cloudshell = string(*_Cloudshell)
 	debug = bool(*_debug)
 	logging = bool(*_Logging)
+	tryCounter = int(*_try)
+	countDown = int(*_countDown)
+	waitSeconds = int(*_wait)
 
 	if *_client == true && *_token == "" {
 		fmt.Println("client mode must set token! {-token}")
@@ -117,11 +132,15 @@ func main() {
 	} else if *_proxy == true {
 		proxyStart(*_port, *_cert, *_key)
 	} else {
-		switch runtime.GOOS {
-		case "linux":
+		if runtime.GOOS == "linux" {
+			debugLog("OS: Linux")
 			linux = true
-		case "windows":
+		} else if runtime.GOOS == "windows" {
+			debugLog("OS: Windows")
 			linux = false
+		} else {
+			fmt.Println("Error: not support this os.")
+			os.Exit(-1)
 		}
 		clientStart(flag.Args()[0], Token)
 	}
@@ -263,8 +282,16 @@ func clientStart(ip, token string) {
 		}
 		time.Sleep(time.Second * time.Duration(1))
 		count = count + 1
-		if count > 59 {
+		if count > (countDown * 3) {
 			fmt.Println("IP: " + ip + " Token: " + token + " Expiration: " + expiration)
+			setHwnd := winctl.GetWindow("GetForegroundWindow", debug)
+			if targetHwnd := winctl.FocusWindow(Cloudshell, debug); winctl.ChangeTarget(targetHwnd, tryCounter, waitSeconds, debug) == false {
+				fmt.Println("AWS CloudShell Window not found!")
+				os.Exit(1)
+			}
+			string2keyboard.KeyboardWrite("\\n")
+			time.Sleep(time.Duration(waitSeconds) * time.Millisecond)
+			winctl.SetActiveWindow(winctl.HWND(setHwnd), debug)
 			count = 0
 		}
 	}
@@ -304,10 +331,8 @@ func serverStart(ip, token string) {
 		}
 		time.Sleep(time.Second * time.Duration(1))
 		count = count + 1
-		if count > 59 {
-			str := "IP: " + ip + " Token: " + token + " Expiration: " + expiration
-			fmt.Println(str)
-			string2keyboard.KeyboardWrite(str)
+		if count > (countDown * 3) {
+			fmt.Println("IP: " + ip + " Token: " + token + " Expiration: " + expiration)
 			count = 0
 		}
 	}
