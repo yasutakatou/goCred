@@ -16,7 +16,7 @@ func ListWindow(Debug bool) []string {
 	return nil
 }
 
-func FocusWindow(targetHwnd, cliHwnd uintptr, title string, Debug bool) uintptr {
+func FocusWindow(title string, Debug bool) uintptr {
 	return 0
 }
 
@@ -31,6 +31,6 @@ func GetWindowRect(hwnd HWND, rect *RECTdata, Debug bool) (err error) {
 	return
 }
 
-func ChangeTarget(setHwnd uintptr) bool {
+func ChangeTarget(setHwnd uintptr, tryCounter, waitSeconds int, Debug bool) bool {
 	return
 }
