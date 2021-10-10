@@ -35,23 +35,21 @@ _____________         __________         ___________
 
 1. Server mode
 
-Get the credentials from AWS CloudShell, encrypt them with a token, and then forward them to the Proxy server.
-
-- wip -
+Get the credentials from AWS CloudShell, **encrypt them with a token**, and then forward them to the Proxy server.
 
 2. Proxy mode
 
-Save the credentials for each token.
-
-note) Since the proxy server needs to be accessed by both the server and the client, the credentials are stored in encrypted form.<br>
-The estimate is that if a string is leaked, it will take an update of the credential before it can be compounded.<br>
+Save the token for each **token word**.<br>
+<br>
+note) Since the proxy server needs to be accessed by both the server and the client networks, the credentials are stored in encrypted form. Even if the string is compromised, it cannot be compounded without knowing the token.
 
 3. Client mode
 
-Get the encrypted credentials that came to access with the token as a password, and compound them with the token.
-
+**Decrypted the string** retrieved from the Proxy with a token.<br>
+<br>
 ![2](https://user-images.githubusercontent.com/22161385/136405752-f4134a0b-5522-41b0-ac7e-4e872785d53a.png)
-When *Expiration* expires, the server sends the update information to the server and the client gets the update.
+<br>
+**When Expiration expires, the server sends the update information to Proxy and the client gets the update, too.**<br>
 
 # installation
 
@@ -73,39 +71,43 @@ go build .
 
 # Usage
 
-**note) prepare cert file beforehand. (use mkcert and such more)**<br>
+**[note) prepare cert file beforehand. (use mkcert and such more)](https://github.com/FiloSottile/mkcert)**<br>
 
-- Access AWS Management Console and Cloudshell
-- Put binary on Cloudshell
+- Access AWS Management Console and **CloudShell**
+- Put binary on CloudShell
 
 ![1](https://user-images.githubusercontent.com/22161385/136404976-559421c4-2405-4ef7-aa44-8ffe977e8c45.png)
 
-or download binay<br>
+or download binary<br>
 
 ```
 curl -OL https://github.com/yasutakatou/goCred/releases/download/XXX/goCred_linux_amd64.zip
 unzip goCred_linux_amd64.zip
 chmod 755 goCred
 ```
-note) The XXX part should be the latest version.<br>
+note) The **XXX** part should be the latest version.<br>
 
 - Run Proxy
 
 ![3](https://user-images.githubusercontent.com/22161385/136408942-9a564658-fcb2-44e3-90d0-cd40955c31b8.png)
 
+**note) The Proxy should be launched on a network that is accessible to both Sever and Client.**
 
-- Run Server on Cloudshell
+- Run Server on CloudShell
 
 [5](https://user-images.githubusercontent.com/22161385/136409115-11bb71f5-c60c-4765-bd8b-5397180667ff.png)
+
+In CloudShell, launch Server mode towards the Proxy. **Specify the IP and port in the red area**.<br>
 
 - Run Client
 
 ![6](https://user-images.githubusercontent.com/22161385/136409249-aa1379d1-5488-4778-8c8d-4c2ce0fc48ba.png)
 
-- every credential limit
+**On the PC where you want to obtain the credentials**, start communication to the Proxy in Client mode.<br>
+
+note) **Specify the IP and port in the red area**.<br>
 
 ![7](https://user-images.githubusercontent.com/22161385/136409462-2d69c8c3-65f5-46d1-b3f7-a78d4e85ce58.png)
-
 
 # options
 ```
@@ -149,13 +151,17 @@ ssl_certificate file path (if you don't use https, haven't to use this option)
 This is the client mode to get the token from the proxy.<br>
 You need to specify the address of the proxy server where you want to get the token.
 
+![6](https://user-images.githubusercontent.com/22161385/136409249-aa1379d1-5488-4778-8c8d-4c2ce0fc48ba.png)
+
+note) **Specify the IP and port in the red area**.<br>
+
 ## -cloudshell string
 
-This is the title of the CloudShell window that will be operated periodically when rpa is enabled.
+This is the **title of the CloudShell window** that will be operated periodically when rpa is enabled.
 
 ## -count int
 
-It's like a regular checkup of the condition.
+This is the setting for **how many seconds to check**.
 
 ## -debug
 
@@ -175,25 +181,33 @@ port number
 
 ## -proxy
 
-Start in proxy mode and wait for server mode and client mode to connect.
+Start in proxy mode and wait for server mode and client mode to connect.<br>
+<br>
+note) You don't need to specify the IP as it will be listened to.<br>
 
 ## -rpa
 
-CloudShell is a use that times out if no operation continues. With this option, you can enter a mode to avoid timeouts by periodically typing ENTER into CloudShell<br>
+CloudShell is times out if no operation continues. With this option, **you can avoid timeouts by periodically typing ENTER into Browser**<br>
 
-note) If you don't use this feature, the default timeout will be 20 minutes.<br>
-note) For now, only Windows OS is supported. I need support for people who have MacOS.<br>
-note) A window showing CloudShell in a browser is required.<br>
+note) If you don't use this feature, the default timeout will be **20 minutes**.<br>
+note) For now, only **Windows OS** is supported. <br>
+note) A window showing **CloudShell in a browser is required**.<br>
 
 ![image](https://user-images.githubusercontent.com/22161385/136655431-19721e8c-a612-4308-8054-ff21bad88cc5.png)
+<br>
+**note) When starting in this mode, it is more stable to click once on the CloudShell browser.**<br>
 
 ## -server
 
-This is the mode to transfer credential from CloudShell to Proxy server.
+This is the mode to transfer token from CloudShell to Proxy server.<br>
+
+[5](https://user-images.githubusercontent.com/22161385/136409115-11bb71f5-c60c-4765-bd8b-5397180667ff.png)
+
+In CloudShell, launch Server mode towards the Proxy. **Specify the IP and port in the red area**.<br>
 
 ## -token string
 
-authentication token (if this value is null, is set random)
+authentication token (if this value is null, is **set random**)
   
 ## -try int
 
