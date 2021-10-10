@@ -95,7 +95,7 @@ note) The **XXX** part should be the latest version.<br>
 
 - Run Server on CloudShell
 
-[5](https://user-images.githubusercontent.com/22161385/136409115-11bb71f5-c60c-4765-bd8b-5397180667ff.png)
+![5](https://user-images.githubusercontent.com/22161385/136409115-11bb71f5-c60c-4765-bd8b-5397180667ff.png)
 
 In CloudShell, launch Server mode towards the Proxy. **Specify the IP and port in the red area**.<br>
 
