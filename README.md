@@ -201,7 +201,7 @@ note) A window showing **CloudShell in a browser is required**.<br>
 
 This is the mode to transfer token from CloudShell to Proxy server.<br>
 
-[5](https://user-images.githubusercontent.com/22161385/136409115-11bb71f5-c60c-4765-bd8b-5397180667ff.png)
+![5](https://user-images.githubusercontent.com/22161385/136409115-11bb71f5-c60c-4765-bd8b-5397180667ff.png)
 
 In CloudShell, launch Server mode towards the Proxy. **Specify the IP and port in the red area**.<br>
 
