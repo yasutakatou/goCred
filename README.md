@@ -2,24 +2,25 @@
 **Aws credential solution by Golang (Works on Linux, Arm, and Windows)**
 
 # Solution
-Is your team managing AWS credentials properly?<br>
-Are you paying out credentials with strong permissions in perpetuity for reasons such as the hassle of renewal?<br>
-Also, you have no control over how long and with what privileges the credential will be used.<br>
-Are you treating credentials the same way you treat old password operations?<br>
-This tool will provide strong privileges to development users without the need to create credentials<br>
+Is your team managing **AWS credentials** properly?<br>
+ Are you useing out credentials with **strong permissions** in perpetuity for reasons such as the hassle of renewal? Are you treating credentials the same way you treat **old password**?<br>
+<br>
+This tool will provide strong privileges to development users **without the need to create credentials**!<br>
 
 # Feature
-This is a solution that automatically renews the strong permissions of aws cloudshell at each deadline through a relay server.<br>
-In cloudshell, credentials similar to account privileges can be obtained in the following way.<br>
+
+**This is a solution that automatically renews of credentials in AWS CloudShell at each deadline through a relay server.**<br>
+<br>
+In CloudShell, credentials similar to account privileges can be obtained in the following way.<br>
 
 ```
 curl -H"Authorization: $AWS_CONTAINER_AUTHORIZATION_TOKEN" $AWS_CONTAINER_CREDENTIALS_FULL_URI
 ```
 
-This tool prepares a proxy and delivers the same credentials to the client.<br>
-The benefits of this are as follows<br>
-- No need to create authoritative credentials.<br>
-- No more accidents due to failure to update credentials that have been created.<br>
+This tool prepares a proxy and delivers the same credentials to the client. The benefits of this are as follows<br>
+
+- **No need to create authoritative credentials.**<br>
+- **No more accidents due to failure to update credentials that have been created.**<br>
 
 # Architecture
 
@@ -34,7 +35,9 @@ _____________         __________         ___________
 
 1. Server mode
 
-Get the credentials from AWS cloudshell, encrypt them with a token, and then forward them to the Proxy server.
+Get the credentials from AWS CloudShell, encrypt them with a token, and then forward them to the Proxy server.
+
+- wip -
 
 2. Proxy mode
 
@@ -70,30 +73,37 @@ go build .
 
 # Usage
 
-**note) prepare cert file beforehand. (use mkcert and such more)**
+**note) prepare cert file beforehand. (use mkcert and such more)**<br>
 
 - Access AWS Management Console and Cloudshell
 - Put binary on Cloudshell
+
 ![1](https://user-images.githubusercontent.com/22161385/136404976-559421c4-2405-4ef7-aa44-8ffe977e8c45.png)
-or
+
+or download binay<br>
+
 ```
 curl -OL https://github.com/yasutakatou/goCred/releases/download/XXX/goCred_linux_amd64.zip
 unzip goCred_linux_amd64.zip
 chmod 755 goCred
 ```
-note) The XXX part should be the latest version.
+note) The XXX part should be the latest version.<br>
 
 - Run Proxy
+
 ![3](https://user-images.githubusercontent.com/22161385/136408942-9a564658-fcb2-44e3-90d0-cd40955c31b8.png)
 
 
 - Run Server on Cloudshell
+
 [5](https://user-images.githubusercontent.com/22161385/136409115-11bb71f5-c60c-4765-bd8b-5397180667ff.png)
 
 - Run Client
+
 ![6](https://user-images.githubusercontent.com/22161385/136409249-aa1379d1-5488-4778-8c8d-4c2ce0fc48ba.png)
 
 - every credential limit
+
 ![7](https://user-images.githubusercontent.com/22161385/136409462-2d69c8c3-65f5-46d1-b3f7-a78d4e85ce58.png)
 
 
@@ -174,6 +184,7 @@ CloudShell is a use that times out if no operation continues. With this option, 
 note) If you don't use this feature, the default timeout will be 20 minutes.<br>
 note) For now, only Windows OS is supported. I need support for people who have MacOS.<br>
 note) A window showing CloudShell in a browser is required.<br>
+
 ![image](https://user-images.githubusercontent.com/22161385/136655431-19721e8c-a612-4308-8054-ff21bad88cc5.png)
 
 ## -server
@@ -186,7 +197,7 @@ authentication token (if this value is null, is set random)
   
 ## -try int
 
-error and try counter
+error and try counter<br>
 **In case of wait next screen a while, set value larger.**
 
 ## -wait int
