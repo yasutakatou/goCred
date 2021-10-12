@@ -1,4 +1,4 @@
-# goCre
+# goCred
 **Aws credential solution by Golang (Works on Linux, Arm, and Windows)**
 
 # Solution
