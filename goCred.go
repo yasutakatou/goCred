@@ -107,7 +107,7 @@ func main() {
 	_rpa := flag.Bool("rpa", true, "[-rpa=CloudShell timeout guard (true is enable)]")
 	_allows := flag.String("allow", "", "[-allow=Allow IPs (Split \",\", Default is allow accept.)]")
 	_filterCount := flag.Int("filterCount", 3, "[-filterCount=allow connect retrys.]")
-	_salt := flag.Bool("salt", false, "[-salt=salt token mode (true is enable)]")
+	_salt := flag.Bool("salt", true, "[-salt=salt token mode (true is enable)]")
 
 	flag.Parse()
 
@@ -217,7 +217,7 @@ func getAWSCred() (string, string, string, string) {
 	// return result.AccessKeyId, result.SecretAccessKey, result.Token, result.Expiration
 
 	t := time.Now()
-	diff := t.Unix() + int64(120)
+	diff := t.Unix() + int64(75)
 	exp := time.Unix(diff, 0)
 	expiration := exp.Format(time.RFC3339Nano)
 	fmt.Println(expiration)
@@ -287,6 +287,9 @@ func getServer(ip, token, saltStr string) (string, string) {
 		crypt := strings.Split(decodes, "\t")
 		writeCredential(crypt[0], crypt[1], crypt[2])
 		debugLog("cred update ok!")
+	} else {
+		debugLog("cred update fail..")
+		os.Exit(1)
 	}
 	return result.Expiration, result.Salt
 }
@@ -344,10 +347,15 @@ func clientStart(ip, token string, salt bool) {
 		os.Exit(1)
 	}
 	t, _ := time.Parse(time.RFC3339Nano, expiration)
-	diff := t.Unix() - int64(countDown/2)
+	//diff := t.Unix() - int64(countDown/2)
+	diff := t.Unix() - int64(countDown+5)
+	fmt.Println(diff)
+	saltStr = ""
 	count := 0
 	for {
 		now := time.Now()
+		fmt.Println(now.Unix())
+		fmt.Println(diff)
 		if now.Unix() >= diff {
 			if salt == true {
 				expiration, saltStr = getServer(ip, token, saltStr)
@@ -360,7 +368,8 @@ func clientStart(ip, token string, salt bool) {
 				os.Exit(1)
 			}
 			t, _ = time.Parse(time.RFC3339Nano, expiration)
-			diff = t.Unix() - int64(countDown/2)
+			//diff = t.Unix() - int64(countDown/2)
+			diff = t.Unix() - int64(countDown-10)
 		}
 		time.Sleep(time.Second * time.Duration(1))
 		count = count + 1
@@ -386,10 +395,14 @@ func serverStart(ip, token string, salt bool) {
 	t, _ := time.Parse(time.RFC3339Nano, expiration)
 	diff := t.Unix() - int64(countDown)
 
-	var pingData string
+	var pingData, saltStr string
 	var err error
 
-	saltStr := RandStr(4)
+	if salt == true {
+		saltStr = RandStr(4)
+	} else {
+		saltStr = ""
+	}
 
 	pingData, err = encrypt(aws_access_key_id+"\t"+aws_secret_access_key+"\t"+aws_session_token, []byte(addSpace(string(token))))
 
@@ -406,15 +419,17 @@ func serverStart(ip, token string, salt bool) {
 		if now.Unix() >= diff {
 			aws_access_key_id, aws_secret_access_key, aws_session_token, expiration = getAWSCred()
 
+			debugLog("cred: " + aws_access_key_id + "\t" + aws_secret_access_key + "\t" + aws_session_token)
+
 			if salt == true {
 				pingData, err = encrypt(aws_access_key_id+"\t"+aws_secret_access_key+"\t"+aws_session_token, []byte(addSpace(string(token+saltStr))))
+				debugLog("now salt: " + token + saltStr)
+				saltStr = RandStr(4)
+				debugLog("next salt: " + token + saltStr)
 			} else {
 				pingData, err = encrypt(aws_access_key_id+"\t"+aws_secret_access_key+"\t"+aws_session_token, []byte(addSpace(string(token))))
 			}
 
-			debugLog("cred: " + aws_access_key_id + "\t" + aws_secret_access_key + "\t" + aws_session_token)
-
-			saltStr = RandStr(4)
 			sendServer(ip, token, pingData, expiration, saltStr)
 			if err != nil {
 				fmt.Println("error: ", err)
@@ -573,11 +588,14 @@ func changeToken(token *encryptCredData) string {
 			encryptCred[x].Label = token.Label
 			encryptCred[x].Cred = token.Cred
 			encryptCred[x].Expiration = token.Expiration
+			encryptCred[x].Salt = token.Salt
+			debugLog("Label: " + token.Label + " Cred:" + token.Cred + " Expiration:" + token.Expiration + " Salt:" + token.Salt)
 			return token.Label + " changed"
 		}
 	}
 
-	encryptCred = append(encryptCred, encryptCredData{Label: token.Label, Cred: token.Cred, Expiration: token.Expiration})
+	debugLog("Label: " + token.Label + " Cred:" + token.Cred + " Expiration:" + token.Expiration + " Salt:" + token.Salt)
+	encryptCred = append(encryptCred, encryptCredData{Label: token.Label, Cred: token.Cred, Expiration: token.Expiration, Salt: token.Salt})
 	return token.Label + " add"
 }
 
