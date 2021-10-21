@@ -107,7 +107,7 @@ func main() {
 	_rpa := flag.Bool("rpa", true, "[-rpa=CloudShell timeout guard (true is enable)]")
 	_allows := flag.String("allow", "", "[-allow=Allow IPs (Split \",\", Default is allow accept.)]")
 	_filterCount := flag.Int("filterCount", 3, "[-filterCount=allow connect retrys.]")
-	_salt := flag.Bool("salt", true, "[-salt=salt token mode (true is enable)]")
+	_salt := flag.Bool("salt", false, "[-salt=salt token mode (true is enable)]")
 
 	flag.Parse()
 
@@ -187,42 +187,41 @@ func addFilter(strs string) {
 }
 
 func getAWSCred() (string, string, string, string) {
-	// awsToken := os.Getenv("AWS_CONTAINER_AUTHORIZATION_TOKEN")
-	// awsCred := os.Getenv("AWS_CONTAINER_CREDENTIALS_FULL_URI")
-	// request, _ := http.NewRequest("GET", awsCred, nil)
-	// request.Header.Set("Authorization", awsToken)
+	awsToken := os.Getenv("AWS_CONTAINER_AUTHORIZATION_TOKEN")
+	awsCred := os.Getenv("AWS_CONTAINER_CREDENTIALS_FULL_URI")
+	request, _ := http.NewRequest("GET", awsCred, nil)
+	request.Header.Set("Authorization", awsToken)
 
-	// tr := &http.Transport{
-	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	// }
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 
-	// client := &http.Client{
-	// 	Transport: tr,
-	// }
-	// resp, err := client.Do(request)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer resp.Body.Close()
-	// body, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	client := &http.Client{
+		Transport: tr,
+	}
+	resp, err := client.Do(request)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// var result credJsonData
-	// if err := json.Unmarshal(body, &result); err != nil {
-	// 	fmt.Println("auth error: token is incorrect?")
-	// 	log.Fatal(err)
-	// }
-	// return result.AccessKeyId, result.SecretAccessKey, result.Token, result.Expiration
+	var result credJsonData
+	if err := json.Unmarshal(body, &result); err != nil {
+		fmt.Println("auth error: token is incorrect?")
+		log.Fatal(err)
+	}
+	return result.AccessKeyId, result.SecretAccessKey, result.Token, result.Expiration
 
-	t := time.Now()
-	diff := t.Unix() + int64(75)
-	exp := time.Unix(diff, 0)
-	expiration := exp.Format(time.RFC3339Nano)
-	fmt.Println(expiration)
-
-	return "AccessKeyId", "SecretAccessKey", "Token", expiration
+	//// for local debug
+	// t := time.Now()
+	// diff := t.Unix() + int64(75)
+	// exp := time.Unix(diff, 0)
+	// expiration := exp.Format(time.RFC3339Nano)
+	// return "AccessKeyId", "SecretAccessKey", "Token", expiration
 }
 
 func getServer(ip, token, saltStr string) (string, string) {
@@ -265,7 +264,7 @@ func getServer(ip, token, saltStr string) (string, string) {
 	}
 
 	if result.Token == "error" {
-		fmt.Println(result.Token + " " + result.Expiration)
+		fmt.Println("Token error: " + result.Token + " " + result.Expiration)
 		os.Exit(1)
 	}
 
@@ -347,15 +346,15 @@ func clientStart(ip, token string, salt bool) {
 		os.Exit(1)
 	}
 	t, _ := time.Parse(time.RFC3339Nano, expiration)
-	//diff := t.Unix() - int64(countDown/2)
-	diff := t.Unix() - int64(countDown+5)
-	fmt.Println(diff)
+
+	diff := t.Unix() - int64(countDown/2)
+	//// for local debug
+	//diff := t.Unix() - int64(countDown+5)
+
 	saltStr = ""
 	count := 0
 	for {
 		now := time.Now()
-		fmt.Println(now.Unix())
-		fmt.Println(diff)
 		if now.Unix() >= diff {
 			if salt == true {
 				expiration, saltStr = getServer(ip, token, saltStr)
@@ -368,8 +367,10 @@ func clientStart(ip, token string, salt bool) {
 				os.Exit(1)
 			}
 			t, _ = time.Parse(time.RFC3339Nano, expiration)
-			//diff = t.Unix() - int64(countDown/2)
-			diff = t.Unix() - int64(countDown-10)
+
+			diff = t.Unix() - int64(countDown/2)
+			//// for local debug
+			//diff = t.Unix() - int64(countDown-10)
 		}
 		time.Sleep(time.Second * time.Duration(1))
 		count = count + 1
@@ -406,7 +407,6 @@ func serverStart(ip, token string, salt bool) {
 
 	pingData, err = encrypt(aws_access_key_id+"\t"+aws_secret_access_key+"\t"+aws_session_token, []byte(addSpace(string(token))))
 
-	debugLog("cred: " + aws_access_key_id + "\t" + aws_secret_access_key + "\t" + aws_session_token)
 	sendServer(ip, token, pingData, expiration, saltStr)
 	if err != nil {
 		fmt.Println("error: ", err)
@@ -419,13 +419,9 @@ func serverStart(ip, token string, salt bool) {
 		if now.Unix() >= diff {
 			aws_access_key_id, aws_secret_access_key, aws_session_token, expiration = getAWSCred()
 
-			debugLog("cred: " + aws_access_key_id + "\t" + aws_secret_access_key + "\t" + aws_session_token)
-
 			if salt == true {
 				pingData, err = encrypt(aws_access_key_id+"\t"+aws_secret_access_key+"\t"+aws_session_token, []byte(addSpace(string(token+saltStr))))
-				debugLog("now salt: " + token + saltStr)
 				saltStr = RandStr(4)
-				debugLog("next salt: " + token + saltStr)
 			} else {
 				pingData, err = encrypt(aws_access_key_id+"\t"+aws_secret_access_key+"\t"+aws_session_token, []byte(addSpace(string(token))))
 			}
@@ -589,12 +585,10 @@ func changeToken(token *encryptCredData) string {
 			encryptCred[x].Cred = token.Cred
 			encryptCred[x].Expiration = token.Expiration
 			encryptCred[x].Salt = token.Salt
-			debugLog("Label: " + token.Label + " Cred:" + token.Cred + " Expiration:" + token.Expiration + " Salt:" + token.Salt)
 			return token.Label + " changed"
 		}
 	}
 
-	debugLog("Label: " + token.Label + " Cred:" + token.Cred + " Expiration:" + token.Expiration + " Salt:" + token.Salt)
 	encryptCred = append(encryptCred, encryptCredData{Label: token.Label, Cred: token.Cred, Expiration: token.Expiration, Salt: token.Salt})
 	return token.Label + " add"
 }
@@ -614,11 +608,9 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	var outputJson []byte
 
 	if len(allows) > 0 {
-		fmt.Println(allows)
 		if checkAllows(r.RemoteAddr) == false {
 			debugLog(r.RemoteAddr + ": not allow!")
 			data = &responseData{Token: "error", Expiration: r.RemoteAddr + ": not allow!", Salt: ""}
-			fmt.Println(data)
 			outputJson, _ = json.Marshal(data)
 			w.Write(outputJson)
 			return
@@ -631,7 +623,6 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		data = &responseData{Token: "error", Expiration: "internal decode error", Salt: ""}
 	} else {
-		fmt.Println(p.Token)
 		token, expiration, saltStr = searchToken(p.Token)
 		if token == "" {
 			if checkRetrys(r.RemoteAddr) == false {
@@ -645,14 +636,12 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 				debugLog(r.RemoteAddr + ": over retrys")
 				data = &responseData{Token: "error", Expiration: r.RemoteAddr + ": over retrys", Salt: ""}
 			} else {
-				fmt.Println(filters)
 				resetRetry(r.RemoteAddr)
 				data = &responseData{Token: token, Expiration: expiration, Salt: saltStr}
 			}
 		}
 	}
 
-	fmt.Println(data)
 	outputJson, err = json.Marshal(data)
 	if err != nil {
 		data = &responseData{Token: "error", Expiration: "internal server error", Salt: ""}
@@ -662,8 +651,6 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 func resetRetry(ipp string) {
 	ip := strings.Split(ipp, ":")[0]
-	fmt.Println(ip)
-	fmt.Println(filters)
 	for x, fil := range filters {
 		if fil.IP == ip {
 			filters[x].Count = 0
@@ -673,7 +660,6 @@ func resetRetry(ipp string) {
 
 func checkRetrys(ipp string) bool {
 	ip := strings.Split(ipp, ":")[0]
-	fmt.Println(filters)
 	for x, fil := range filters {
 		if fil.IP == ip {
 			if fil.Count >= filterCount {
@@ -689,9 +675,7 @@ func checkRetrys(ipp string) bool {
 }
 
 func checkAllows(ip string) bool {
-	fmt.Println(ip)
 	for _, allow := range allows {
-		fmt.Println(allow)
 		ipRegex := regexp.MustCompile(allow)
 		if ipRegex.MatchString(ip) == true {
 			return true
@@ -701,7 +685,6 @@ func checkAllows(ip string) bool {
 }
 
 func searchToken(token string) (string, string, string) {
-	fmt.Println(encryptCred)
 	for _, cred := range encryptCred {
 		if cred.Label == token {
 			return cred.Cred, cred.Expiration, cred.Salt
