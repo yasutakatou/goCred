@@ -3,11 +3,11 @@
 
 ## v0.3
 - Detection of unauthorized access
- - Locks access in case of repeated unauthorized access.
+	-  Locks access in case of repeated unauthorized access.
 - Added the ability to specify which IPs can connect
- - Allow by IP address
+	-  Allow by IP address
 - SALT can now be used as a token
- - Handling credentials more securely with SALT
+	-  Handling credentials more securely with SALT
 
 # Solution
 Is your team managing **AWS credentials** properly?<br>
