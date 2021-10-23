@@ -1,6 +1,14 @@
 # goCred
 **Aws credential solution by Golang (Works on Linux, Arm, and Windows)**
 
+## v0.3
+- Detection of unauthorized access
+	-  Locks access in case of repeated unauthorized access.
+- Added the ability to specify which IPs can connect
+	-  Allow by IP address
+- SALT can now be used as a token
+	-  Handling credentials more securely with SALT
+
 # Solution
 Is your team managing **AWS credentials** properly?<br>
  Are you useing out credentials with **strong permissions** in perpetuity for reasons such as the hassle of renewal? Are you treating credentials the same way you treat **old password**?<br>
@@ -112,6 +120,8 @@ note) **Specify the IP and port in the red area**.<br>
 # options
 ```
 Usage of goCred.exe:
+  -allow string
+        [-allow=Allow IPs (Split ",", Default is allow accept.)]
   -cert string
         [-cert=ssl_certificate file path] (default "localhost.pem")
   -client
@@ -122,6 +132,8 @@ Usage of goCred.exe:
         [-count=operating interval ] (default 60)
   -debug
         [-debug=debug mode (true is enable)]
+  -filterCount int
+        [-filterCount=allow connect retrys.] (default 3)
   -key string
         [-key=ssl_certificate_key file path] (default "localhost-key.pem")
   -log
@@ -132,6 +144,8 @@ Usage of goCred.exe:
         [-proxy=Proxy mode (true is enable)]
   -rpa
         [-rpa=CloudShell timeout guard (true is enable)] (default true)
+  -salt
+        [-salt=salt token mode (true is enable)]
   -server
         [-server=Server mode (true is enable)]
   -token string
@@ -141,6 +155,22 @@ Usage of goCred.exe:
   -wait int
         [-wait=loop wait Millisecond] (default 250)
 ```
+
+## -allow string (from v0.3)
+
+Specifies the string contained in the IP address to be allowed to connect.<br>
+
+```
+$ ./goCred -proxy -port=8080 -allow=172.18.,172.19.,172.20.
+```
+
+Clients that do not allow it will exit as follows<br>
+
+```
+Token error: error 192.168.0.1:51240: not allow!
+```
+
+note) **You can specify multiple items separated by commas ","**.<br>
 
 ## -cert string
 
@@ -166,6 +196,33 @@ This is the setting for **how many seconds to check**.
 ## -debug
 
 debug mode (true is enable)
+
+## -filterCount int (from v0.3)
+
+Counts connections that are not allowed or have the wrong token when the **"allow" option is enabled**.<br>
+If the specified number of times is exceeded, **the connection will be blocked.**<br>
+
+```
+$ ./goCred -proxy -port=8080 -filterCount=3
+```
+
+Clients that do not allow it will exit as follows<br>
+
+```
+$ ./goCred -client -token=wrongToken 192.168.0.1:8080
+OS: Linux
+Token error: error token invalid
+exit status 1
+$ ./goCred -client -token=wrongToken 192.168.0.1:8080
+OS: Linux
+Token error: error 192.168.0.1:51150: over retrys
+exit status 1
+$ ./goCred -client -token=trueToken 192.168.0.1:8080
+OS: Linux
+Token error: error 192.168.0.1:51150: over retrys
+```
+
+note) **Once blocked, it will continue to block until the process is restarted**.<br>
 
 ## -key string
 
@@ -196,6 +253,22 @@ note) A window showing **CloudShell in a browser is required**.<br>
 ![image](https://user-images.githubusercontent.com/22161385/136655431-19721e8c-a612-4308-8054-ff21bad88cc5.png)
 <br>
 **note) When starting in this mode, it is more stable to click once on the CloudShell browser.**<br>
+
+## -salt
+
+Encrypting credentials with SALT when they are updated prevents **the token from being parsed**.<br>
+Please enable the salt option in **all modes**.
+
+```
+$ ./goCred -proxy -port=8080 -salt
+
+$ ./goCred -server -token=test -salt 10.0.0.1:8080
+
+$ ./goCred -client -token=test -salt 192.168.0.1:8080
+```
+
+note) At **first the credentials without SALT are encrypted**, then they are encrypted.
+This means that the client must be connected before **the next credential update** or it will not be able to be compounded.
 
 ## -server
 

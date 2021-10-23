@@ -335,6 +335,8 @@ func writeCredential(aws_access_key_id, aws_secret_access_key, aws_session_token
 func clientStart(ip, token string, salt bool) {
 	var expiration, saltStr string
 
+	saltStr = ""
+
 	if salt == true {
 		expiration, saltStr = getServer(ip, token, "")
 	} else {
@@ -351,7 +353,6 @@ func clientStart(ip, token string, salt bool) {
 	//// for local debug
 	//diff := t.Unix() - int64(countDown+5)
 
-	saltStr = ""
 	count := 0
 	for {
 		now := time.Now()
@@ -407,6 +408,7 @@ func serverStart(ip, token string, salt bool) {
 
 	pingData, err = encrypt(aws_access_key_id+"\t"+aws_secret_access_key+"\t"+aws_session_token, []byte(addSpace(string(token))))
 
+	debugLog("SEND) IP:" + ip + " Token:" + token + " Cred:" + pingData + " Expiration:" + expiration + " Salt:" + saltStr)
 	sendServer(ip, token, pingData, expiration, saltStr)
 	if err != nil {
 		fmt.Println("error: ", err)
@@ -426,6 +428,7 @@ func serverStart(ip, token string, salt bool) {
 				pingData, err = encrypt(aws_access_key_id+"\t"+aws_secret_access_key+"\t"+aws_session_token, []byte(addSpace(string(token))))
 			}
 
+			debugLog("SEND) IP:" + ip + " Token:" + token + " Cred:" + pingData + " Expiration:" + expiration + " Salt:" + saltStr)
 			sendServer(ip, token, pingData, expiration, saltStr)
 			if err != nil {
 				fmt.Println("error: ", err)
@@ -566,6 +569,7 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	debugLog("PUT) Label: " + p.Label + " Cred: " + p.Cred + " Expiration: " + p.Expiration + " Salt:" + p.Salt)
 	resp := changeToken(p)
 
 	data := &responseData{Token: resp}
@@ -641,6 +645,8 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
+	debugLog("GET) Tokoen: " + data.Token + " Expiration: " + data.Expiration + " Salt: " + data.Salt)
 
 	outputJson, err = json.Marshal(data)
 	if err != nil {
